@@ -4,7 +4,6 @@ var HEIGHT;
 
 var dx = 20;
 var dy = 20;
-var dr = 10;
 
 // 0: left
 // 1: up
@@ -23,6 +22,8 @@ function init() {
   ctx = $('#canvas')[0].getContext("2d");
   WIDTH = $("#canvas").width();
   HEIGHT = $("#canvas").height();
+
+  ctx.font="20px Arial";
 
   createsnake();
   newfood();
@@ -85,7 +86,6 @@ function newfood() {
   food = Array();
   food.x = randomx * dx;
   food.y = randomy * dy;
-  food.r = dr;
   size = size+1;
 }
 
@@ -167,13 +167,11 @@ function screenclear() {
 }
 
 function drawsnake() {
-  ctx.fillStyle = "#FFFFFF";
   snake.forEach(function(p) {
-    rect(p.x, p.y, dx, dy);
-  })
+    ctx.fillText('⛹️', p.x + dx / 2, p.y + dy);
+  });
 }
 
 function drawfood() {
-  ctx.fillStyle = "#FF0000";
-  circle(food.x+food.r, food.y+food.r, food.r);
+  ctx.fillText('🏀', food.x + dx / 2, food.y + dy);
 }
