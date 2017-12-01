@@ -9,6 +9,8 @@ $( document ).ready(function() {
         gameStarted = true;
         gamerun();
       }
+
+      e.preventDefault();
     }
 
 });

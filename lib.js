@@ -45,6 +45,8 @@ function onKeyDown(evt) {
   if (newdir != direction && newdir != direction+2 && newdir != direction-2) {
     direction = newdir;
   }
+
+  evt.preventDefault();
 }
 
 if ($.browser.mozilla) {
