@@ -45,7 +45,7 @@ function showIntro() {
     ctx.font="30px Arial";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("SNAKE", canvas.width/2, canvas.height/2);
+    ctx.fillText("🏀 ⛹️⛹️⛹️⛹️⛹️", canvas.width/2, canvas.height/2);
 
     ctx.font="20px Arial";
     ctx.fillText("press space to start", canvas.width/2, canvas.height/2+40);
