@@ -49,11 +49,7 @@ function onKeyDown(evt) {
   evt.preventDefault();
 }
 
-if ($.browser.mozilla) {
-    $(document).keypress(onKeyDown);
-} else {
-    $(document).keydown(onKeyDown);
-}
+$(document).keydown(onKeyDown);
 
 function createsnake() {
   snake = Array();

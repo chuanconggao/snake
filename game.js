@@ -4,14 +4,14 @@ $( document ).ready(function() {
     showIntro();
 
     // Start game on spacebar press.
-    this.onkeypress = function(e) {
+    $(this).keydown(function(e) {
       if (gameStarted == false && e.keyCode == 32) { // 32 = Spacebar
         gameStarted = true;
         gamerun();
       }
 
       e.preventDefault();
-    }
+    });
 
 });
 
