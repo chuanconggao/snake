@@ -1,65 +1,73 @@
 var gameStarted = false;
 
-$( document ).ready(function() {
+var canvas;
+var ctx;
+var width;
+var height;
+
+var dx = 20;
+var dy = 20;
+
+$(document).ready(function() {
+    canvas = $("#canvas")[0];
+    ctx = canvas.getContext("2d");
+    width = canvas.width;
+    height = canvas.height;
+
     showIntro();
 
     // Start game on spacebar press.
-    $(this).keydown(function(e) {
-      if (gameStarted == false && e.keyCode == 32) { // 32 = Spacebar
-        gameStarted = true;
-        gamerun();
-      }
+    $(this).keydown(e => {
+        if (!gameStarted && e.keyCode == 32) { // 32 = Spacebar
+            gameStarted = true;
 
-      e.preventDefault();
+            ctx.font="20px Arial";
+            init();
+        }
+
+        e.preventDefault();
     });
-
 });
 
-function gamerun() {
-  init();
-}
+function clear() {
+    ctx.fillStyle = "#000000";
+    ctx.clearRect(0, 0, width, height);
 
-function step(){
-  update();
-  draw();
-}
-
-function update() {
-  if (!movesnake()) {
-    die();
-    showConclusion(size)
-  }
+    ctx.beginPath();
+    ctx.rect(0, 0, width, height);
+    ctx.closePath();
+    ctx.fill();
 }
 
 function draw() {
-  if (gameStarted) {
-      screenclear();
-      drawsnake();
-      drawfood();
-  }
+    clear();
+
+    snake.forEach(p => ctx.fillText('⛹️', p.x + dx / 2, p.y + dy));
+    ctx.fillText('🏀', food.x + dx / 2, food.y + dy);
+    ctx.fillText('🚧', poison.x + dx / 2, poison.y + dy);
 }
 
 function showIntro() {
-    var canvas = document.getElementById("canvas");
-    var ctx=canvas.getContext("2d");
-    ctx.font="30px Arial";
+    clear();
+
+    ctx.font = "30px Arial";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("🏀 ⛹️⛹️⛹️⛹️⛹️", canvas.width/2, canvas.height/2);
+    ctx.fillText("🏀 ⛹️⛹️⛹️⛹️⛹️", canvas.width / 2, canvas.height / 2);
 
-    ctx.font="20px Arial";
-    ctx.fillText("press space to start", canvas.width/2, canvas.height/2+40);
+    ctx.font = "20px Arial";
+    ctx.fillText("press space to start", canvas.width / 2, canvas.height / 2 + 40);
 }
 
 function showConclusion(score) {
-    screenclear();
-    var canvas = document.getElementById("canvas");
-    var ctx=canvas.getContext("2d");
+    clear();
+
     ctx.font="30px Arial";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2);
-    ctx.fillText("score: " + score, canvas.width/2, canvas.height/2-40);
+    ctx.fillText("score: " + score, width / 2, height / 2 - 40);
+    ctx.fillText("GAME OVER", width / 2, height / 2);
+
     ctx.font="20px Arial";
-    ctx.fillText("press space to start", canvas.width/2, canvas.height/2+80);
+    ctx.fillText("press space to start", width / 2, height / 2 + 80);
 }

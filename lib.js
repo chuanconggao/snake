@@ -1,175 +1,132 @@
-var ctx;
-var WIDTH;
-var HEIGHT;
-
-var dx = 20;
-var dy = 20;
-
+var direction;
 // 0: left
 // 1: up
 // 2: right
 // 3: down
-var direction;
 
 var snake;
 var size;
 
 var food;
+var poison;
 
-var id;
+var timer;
+
+$(document).keydown(e => {
+    if (!gameStarted) {
+        return;
+    }
+
+    // only lateral turns are allowed
+    // (that is, no u-turns)
+    newDirection = e.keyCode - 37;
+    if (newDirection != direction && newDirection != direction + 2 && newDirection != direction - 2) {
+        direction = newDirection;
+    }
+
+    e.preventDefault();
+});
 
 function init() {
-  ctx = $('#canvas')[0].getContext("2d");
-  WIDTH = $("#canvas").width();
-  HEIGHT = $("#canvas").height();
+    createSnake();
+    createItems();
 
-  ctx.font="20px Arial";
+    direction = 0;
 
-  createsnake();
-  newfood();
+    timer = setInterval(() => {
+        if (moveSnake()) {
+            draw();
+        }
+        else {
+            clearInterval(timer);
 
-  direction = 0;
-  size = 1;
-
-  id = setInterval(step, 100);
+            gameStarted = false;
+            showConclusion(size - 1);
+        }
+    }, 100);
 }
 
-function onKeyDown(evt) {
-  if (evt.keyCode == 32) {
-    return;
-  }
-  newdir = evt.keyCode - 37;
+function createSnake() {
+    var head = Array();
+    head.x = width / 2;
+    head.y = height / 2;
 
-  // only lateral turns are allowed
-  // (that is, no u-turns)
-  if (newdir != direction && newdir != direction+2 && newdir != direction-2) {
-    direction = newdir;
-  }
-
-  evt.preventDefault();
+    snake = Array();
+    snake.push(head);
+    size = 1;
 }
 
-$(document).keydown(onKeyDown);
+function createItem() {
+    item = Array();
+    item.x = Math.floor(Math.random() * width / dx) * dx;
+    item.y = Math.floor(Math.random() * height / dy) * dy;
 
-function createsnake() {
-  snake = Array();
-  var head = Array();
-  head.x = WIDTH/2;
-  head.y = HEIGHT/2;
-  snake.push(head);
+    return item;
 }
 
-function collision(n) {
-  // are we out of the playground?
-  if (n.x < 0 || n.x > WIDTH - 1 || n.y < 0 || n.y > HEIGHT - 1) {
-    return true;
-  }
+function createItems() {
+    food = createItem();
 
-  // are we eating ourselves?
-  for (var i = 0; i < snake.length; i++) {
-    if (snake[i].x == n.x && snake[i].y == n.y) {
-      return true;
+    do {
+        poison = createItem();
+    } while (food.x == poison.x && food.y == poison.y);
+}
+
+function isCollision(n) {
+    // are we out of the playground?
+    if (n.x < 0 || n.x > width - 1 || n.y < 0 || n.y > height - 1) {
+        return true;
     }
-  }
-  return false;
+
+    // are we eating ourselves?
+    return snake.some(p => p.x == n.x && p.y == n.y);
 }
 
-function newfood() {
-  var wcells = WIDTH/dx;
-  var hcells = HEIGHT/dy;
+function moveSnake() {
+    head = snake[0]; // peek head
 
-  var randomx = Math.floor(Math.random()*wcells);
-  var randomy = Math.floor(Math.random()*hcells);
+    // create new head relative to current head
+    var n = Array();
+    switch (direction) {
+        case 0: // left
+            n.x = head.x - dx;
+            n.y = head.y;
+            break;
+        case 1: // up
+            n.x = head.x;
+            n.y = head.y - dy;
+            break;
+        case 2: // right
+            n.x = head.x + dx;
+            n.y = head.y;
+            break;
+        case 3: // down
+            n.x = head.x;
+            n.y = head.y + dy;
+            break;
+    }
 
-  food = Array();
-  food.x = randomx * dx;
-  food.y = randomy * dy;
-  size = size+1;
-}
+    // if out of box or collision with ourselves, we die
+    if (isCollision(n)) {
+        return false;
+    }
 
-function meal(n) {
-  return (n.x == food.x && n.y == food.y);
-}
+    // if there's poison there
+    if (n.x == poison.x && n.y == poison.y) {
+        return false;
+    }
 
-function movesnake() {
+    snake.unshift(n);
 
-  h = snake[0]; // peek head
+    // if there's food there
+    if (n.x == food.x && n.y == food.y) {
+        size += 1;
+        // we eat it and another shows up
+        createItems();
+    } else {
+        // we only remove the tail if there wasn't food
+        snake.pop();
+    }
 
-  // create new head relative to current head
-  var n = Array();
-  switch (direction) {
-    case 0: // left
-      n.x = h.x - dx;
-      n.y = h.y;
-      break;
-    case 1: // up
-      n.x = h.x;
-      n.y = h.y - dy;
-      break;
-    case 2: // right
-      n.x = h.x + dx;
-      n.y = h.y;
-      break;
-    case 3: // down
-      n.x = h.x;
-      n.y = h.y + dy;
-      break;
-  }
-
-  // if out of box or collision with ourselves, we die
-  if (collision(n)) {
-    return false;
-  }
-
-  snake.unshift(n);
-
-  // if there's food there
-  if (meal(n)) {
-    newfood(); // we eat it and another shows up
-    
-  } else {
-    snake.pop();
-    // we only remove the tail if there wasn't food
-    // if there was food, the snake grew
-  }
-
-  return true;
-
-}
-
-function die() {
-  if (id) {
-    clearInterval(id);
-  }
-  gameStarted = false;
-}
-
-function circle(x,y,r) {
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI*2, true);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function rect(x,y,w,h) {
-  ctx.beginPath();
-  ctx.rect(x,y,w,h);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function screenclear() {
-  ctx.fillStyle = "#000000";
-  ctx.clearRect(0, 0, WIDTH, HEIGHT);
-  rect(0,0,WIDTH,HEIGHT);
-}
-
-function drawsnake() {
-  snake.forEach(function(p) {
-    ctx.fillText('⛹️', p.x + dx / 2, p.y + dy);
-  });
-}
-
-function drawfood() {
-  ctx.fillText('🏀', food.x + dx / 2, food.y + dy);
+    return true;
 }
